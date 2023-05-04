@@ -1,31 +1,106 @@
 # Therefore
 
-TODO: Delete this and the text below, and describe your gem
+A simple wrapper for `if` conditionals, what `each` is for `while` loops.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/therefore`. To experiment with that code, run `bin/console` for an interactive prompt.
+Just like `each`, `therefore` relies on block semantics, so it's essentially an `if` conditional with a scope, a closure, and the ability to be chained with other methods.
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+Add this line to your application's Gemfile:
 
-Install the gem and add to the application's Gemfile by executing:
+```ruby
+gem 'therefore', '~> 1.0'
+```
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+And then execute:
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+```bash
+$ bundle
+```
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+Or you can install the gem on its own:
+
+```bash
+gem install therefore
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+`obj.therefore {...}` will invoke the block, yielding `obj` to it, unless `obj` is either `nil` or `false`. If the block is invoked its result is returned, otherwise `obj` is returned:
 
-## Development
+```ruby
+def find_user input: {}
+  input[:id].therefore do |user_id|
+    User.find user_id
+  end
+end
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+find_user input: {id: 1} # => #<User id: 1, ...>
+find_user input: {id: nil} # => nil
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+`obj.otherwise {...}` behaves symmetrically to `therefore`: it only invokes the block, again yielding `obj`, if `obj` is either `false` or `nil`. Again, if the block is invoked its result is returned, otherwise `obj` is returned. If you chain it with `therefore`, it can work as an `else` branch:
+
+```ruby
+def find_user input: {}
+  input[:id].therefore do |user_id|
+    User.find user_id
+  end.otherwise do
+    User.default
+  end
+end
+
+find_user input: {id: 1} # => #<User id: 1, ...>
+find_user input: {id: nil} # => #<User default: true, ...>
+```
+
+You can also invoke `otherwise` with a parameter, in which case it works as an `elsif` branch:
+
+```ruby
+obj.otherwise(other_obj) do |var|
+  ...
+end
+```
+
+is equivalent to
+
+```ruby
+obj.otherwise do
+  other_obj.therefore do |var|
+    ...
+  end
+end
+```
+
+Both `therefore` and `otherwise` can be called without a block, in which case they return an enumerator. If the block would have been invoked the enumerator contains `obj`, otherwise it is empty:
+
+```ruby
+nil.therefore.to_a # => []
+nil.otherwise.to_a # => [nil]
+'string'.therefore.to_a # => ['string']
+'string'.otherwise.to_a # => []
+```
+
+## Version numbers
+
+Therefore loosely follows [Semantic Versioning](https://semver.org/), with a hard guarantee that breaking changes to the public API will always coincide with an increase to the `MAJOR` number.
+
+Version numbers are in three parts: `MAJOR.MINOR.PATCH`.
+
+- Breaking changes to the public API increment the `MAJOR`. There may also be changes that would otherwise increase the `MINOR` or the `PATCH`.
+- Additions, deprecations, and "big" non breaking changes to the public API increment the `MINOR`. There may also be changes that would otherwise increase the `PATCH`.
+- Bug fixes and "small" non breaking changes to the public API increment the `PATCH`.
+
+Notice that any feature deprecated by a minor release can be expected to be removed by the next major release.
+
+## Changelog
+
+Full list of changes in [CHANGELOG.md](CHANGELOG.md)
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/therefore.
+Bug reports and pull requests are welcome on GitHub at https://github.com/moku-io/therefore.
+
+## License
+
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
