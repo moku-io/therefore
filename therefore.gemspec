@@ -7,8 +7,8 @@ Gem::Specification.new do |spec|
   spec.email = ['info@moku.io']
   spec.license = 'MIT'
 
-  spec.summary = 'A simple wrapper for `if` conditionals, what `each` is for `while` loops.'
-  spec.description = "Just like `each`, `therefore` relies on block semantics, so it's essentially an `if` " \
+  spec.summary = 'A simple wrapper for if conditionals, what each is for while loops.'
+  spec.description = "Just like each, therefore relies on block semantics, so it's essentially an if " \
                      'conditional with a scope, a closure, and the ability to be chained with other methods.'
   spec.homepage = 'https://github.com/moku-io/therefore'
   spec.required_ruby_version = '>= 2.6.0'
